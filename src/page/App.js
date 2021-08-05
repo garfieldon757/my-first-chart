@@ -1,19 +1,25 @@
 import './App.css';
 import React, { useEffect } from "react";
-import LineChart from './Chart.js';
+import LineChart from '../component/LineChart.js';
+import Canvas from '../util/Canvas';
 
 function init() {
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+  const canvasInstance = new Canvas({ domId: 'canvas' });
 
-  window.ctx = ctx;
+  window.canvasInstance = canvasInstance;
 }
 
 function setOption(option) {
-  const ctx = window.ctx;
+  const canvasInstance = window.canvasInstance;
+  const canvas = canvasInstance.canvas;
+  const ctx = canvasInstance.ctx;
 
-  const lineChart = new LineChart(ctx, option);
+  // 首次绘制
+  const lineChart = new LineChart(canvas, ctx, option);
   lineChart.render();
+  // 更新事件
+  canvasInstance.addShape(lineChart);
+  canvasInstance.initEvent();
 }
 
 
@@ -26,7 +32,13 @@ function App() {
     const option = {
       data: [50,45,46,42,40,42,35],
       xAxis: [10,11,12,13,14, 15,16],
-      yAxis: [30,40,50,60]
+      yAxis: [30,40,50,60],
+      canvas: {
+        x: 0,
+        y: 0,
+        width: 600,
+        height: 400
+      }
     };
     setOption(option);
   }, []);

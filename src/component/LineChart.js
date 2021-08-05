@@ -1,19 +1,23 @@
-export default class LineChart {
-    constructor(context, option) {
-      this.ctx = context;
-      this.option = option;
+import Event from "../util/Event";
 
-      const {
-        originX, originY
-      } = this._calOriginCoord();
-      this.originX = originX;
-      this.originY = originY;
+export default class LineChart extends Event {
+    constructor(canvas, context, option) {
+        super();
+
+        this.canvas = canvas;
+        this.ctx = context;
+        this.option = option;
+
+        const { originX, originY } = this._calOriginCoord();
+        this.originX = originX;
+        this.originY = originY;
     }
     render() {
         const ctx = this.ctx;
     
         // 1.画布轮廓
-        ctx.strokeRect(0, 0, 600, 300);
+        const { canvas: { x, y, width, height } } = this.option;
+        ctx.strokeRect(x, y, width, height);
         // 2.坐标轴
         ctx.beginPath();
         this._drawAxis({
@@ -30,6 +34,23 @@ export default class LineChart {
             ctx: this.ctx 
         });
         ctx.stroke();
+    }
+
+    isEventInRegion(clientX, clientY) {
+        const eventPoint = this._translateCoord(clientX, clientY);
+        const { canvas: { x, y, width, height } } = this.option;
+        
+        const xInRange = eventPoint.x > x && eventPoint.x < x + width;
+        const yInRange = eventPoint.y > y && eventPoint.y < y + height;
+        return xInRange && yInRange;
+    }
+
+    _translateCoord(clientX, clientY) {
+        const bbox = this.canvas.getBoundingClientRect();
+        return {
+            x: clientX - bbox.left,
+            y: clientY - bbox.top
+        }
     }
 
     // 计算坐标轴原点坐标
